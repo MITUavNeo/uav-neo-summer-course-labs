@@ -2,10 +2,6 @@
 MIT BWSI Autonomous Drone Racing Course - UAV Neo
 GNU General Public License v3.0
 
-File Name: p_control.py  (SOLUTION)
-Title: Week 3 Module 2 — Proportional Control (concept warm-up)
-Source notebook: simple_feedback_control.ipynb  (Simple Slide Camera)
-
 CONCEPT lab — no simulator needed. Run directly:
     python3 p_control.py
 Then move on to step1_altitude_hold.py to use the same idea on the real drone.

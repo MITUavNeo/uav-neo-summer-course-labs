@@ -2,22 +2,13 @@
 MIT BWSI Autonomous Drone Racing Course - UAV Neo
 GNU General Public License v3.0
 
-File Name: neo_lab.py
 Shared helpers for the simulator labs.
 
-Why this exists
----------------
-In the UAV Neo simulator the drone does NOT spawn at altitude 0 — it reads a
-ground offset (e.g. ~7 m), and `takeoff()` alone does not climb. Throttle acts
-like a vertical-velocity command (≈12 m/s per unit) and `stop()` holds altitude.
-
-So every flying lab must:
-  1. ARM by calling `takeoff()` for a moment, then
-  2. CLIMB to a working height using throttle, measuring altitude RELATIVE to the
-     ground sampled at launch.
-
-`Launcher` does exactly that, and `height(drone)` gives altitude above the ground
-captured at launch so labs never hardcode the absolute spawn altitude.
+The drone reads a non-zero ground altitude and does not climb from takeoff() alone:
+throttle is a vertical-velocity command (about 12 m/s per unit) and stop() holds position.
+A flying lab arms with takeoff(), then climbs with throttle to a working height, measuring
+altitude relative to the ground sampled at launch. Launcher handles that, and height(drone)
+reports altitude above the launch ground.
 """
 
 import csv
@@ -33,10 +24,9 @@ _ground_alt = 0.0
 
 
 # ── Gate vision ─────────────────────────────────────────────────────────────────────
-# The UAV Neo race scene has no red props or colored ground lines. Gates are dark
-# frames with GLOWING edges — cyan on the forward camera, white on the downward
-# camera — over a blue wall / grey floor. Both read as high "Value" in HSV, so the
-# most robust gate signal is brightness.
+# Gates are dark frames with glowing edges — cyan on the forward camera, white on the
+# downward camera. Both read as high "Value" in HSV, so brightness is the strongest
+# gate signal.
 
 # Cyan gate edges on the forward camera (separates from the blue background ~hue 108).
 CYAN_LOWER = np.array([80, 40, 150], dtype=np.uint8)

@@ -4,7 +4,6 @@ GNU General Public License v3.0
 
 Week 2/3 Lab — Step 1: Grayscale Thresholding
 Grayscale + binary threshold of the live downward camera feed.
-Source: 02_OpenCV.ipynb (cv2.threshold).
 """
 
 import drone_core

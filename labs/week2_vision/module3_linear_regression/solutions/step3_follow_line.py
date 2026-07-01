@@ -4,7 +4,6 @@ GNU General Public License v3.0
 
 Week 2/3 Lab — Step 3: Follow the Edge  (SOLUTION)
 Steer the drone to keep the bright edge centered while flying forward.
-Source: 03_LinearRegression.ipynb applied live.
 """
 
 import drone_core

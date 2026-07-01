@@ -5,7 +5,6 @@ GNU General Public License v3.0
 Week 2/3 Lab — Step 2: Fly a Distance (PID on Position)
 Integrate forward velocity into position and PID to a target distance,
 while a proportional term keeps altitude.
-Source: simple_feedback_control.ipynb (2-D quad).
 """
 
 import drone_core

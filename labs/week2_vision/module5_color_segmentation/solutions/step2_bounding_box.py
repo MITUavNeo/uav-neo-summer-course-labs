@@ -4,7 +4,6 @@ GNU General Public License v3.0
 
 Week 2/3 Lab — Step 2: Bounding Box  (SOLUTION)
 Find the largest cyan gate structure and its bounding box.
-Source: 05_ColorSegmentation.ipynb (bounding boxes).
 """
 
 import drone_core

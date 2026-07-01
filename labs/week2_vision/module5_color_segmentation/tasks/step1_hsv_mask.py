@@ -5,7 +5,6 @@ GNU General Public License v3.0
 Week 2/3 Lab — Step 1: HSV Color Mask
 Mask the CYAN glowing gates in the forward camera using an HSV range.
 (Gates glow cyan ~hue 85; the wall background is blue ~hue 108.)
-Source: 05_ColorSegmentation.ipynb (HSV masking), retargeted to the scene.
 """
 
 import drone_core

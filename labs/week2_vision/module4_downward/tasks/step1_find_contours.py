@@ -5,7 +5,6 @@ GNU General Public License v3.0
 Week 2/3 Lab — Step 1: Find Gate Contours
 Threshold the glowing gate edges below the drone and count contours.
 The downward camera sees gates as bright WHITE frames.
-Source: 04_Downward.ipynb (contour analysis), retargeted to the sim scene.
 """
 
 import drone_core

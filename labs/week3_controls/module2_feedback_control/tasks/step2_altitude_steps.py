@@ -4,7 +4,6 @@ GNU General Public License v3.0
 
 Week 2/3 Lab — Step 2: Altitude Setpoint Sequence
 Chase a sequence of target heights (a step response).
-Source: simple_feedback_control.ipynb (closed-loop tracking).
 """
 
 import drone_core

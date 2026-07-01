@@ -4,7 +4,6 @@ GNU General Public License v3.0
 
 Week 2/3 Lab — Step 2: Largest Gate  (SOLUTION)
 Locate the largest glowing gate frame and report its center and area.
-Source: 04_Downward.ipynb (largest contour + centroid).
 """
 
 import drone_core

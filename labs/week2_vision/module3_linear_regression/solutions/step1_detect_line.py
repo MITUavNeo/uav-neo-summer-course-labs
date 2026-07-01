@@ -5,7 +5,6 @@ GNU General Public License v3.0
 Week 2/3 Lab — Step 1: Detect the Bright Edge Pixels  (SOLUTION)
 Find the glowing gate-edge pixels in the downward camera.
 (The race scene has no colored ground line; gates glow white from above.)
-Source: 03_LinearRegression.ipynb (thresholding + np.argwhere).
 """
 
 import drone_core

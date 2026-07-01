@@ -2,10 +2,6 @@
 MIT BWSI Autonomous Drone Racing Course - UAV Neo
 GNU General Public License v3.0
 
-File Name: coordinate_frames.py  (SOLUTION)
-Title: Week 3 Module 1 — Coordinate Frames & Dynamics
-Source notebook: CoordinateFrames_and_Dynamics.ipynb
-
 This is a CONCEPT lab — it does not need the simulator.
 Run it directly:
     python3 coordinate_frames.py

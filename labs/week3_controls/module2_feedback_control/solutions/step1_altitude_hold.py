@@ -5,7 +5,6 @@ GNU General Public License v3.0
 Week 2/3 Lab — Step 1: Proportional Altitude Hold  (SOLUTION)
 Hold a target height using proportional throttle control.
 Heights are measured above the ground sampled at launch.
-Source: simple_feedback_control.ipynb (p_control).
 """
 
 import drone_core

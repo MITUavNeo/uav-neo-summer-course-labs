@@ -4,7 +4,6 @@ GNU General Public License v3.0
 
 Week 2/3 Lab — Step 3: Blur & Edge Detection
 Averaging blur then a Sobel edge-magnitude image.
-Source: 02_OpenCV.ipynb (averaging kernel, Sobel stretch goal).
 """
 
 import drone_core

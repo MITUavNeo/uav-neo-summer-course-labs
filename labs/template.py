@@ -2,10 +2,6 @@
 MIT BWSI Autonomous Drone Racing Course - UAV Neo
 GNU General Public License v3.0
 
-File Name: template.py << [Modify with your own file name!]
-
-Title: [PLACEHOLDER] << [Modify with your own title]
-
 Author: [PLACEHOLDER] << [Write your name or team name here]
 
 Purpose: [PLACEHOLDER] << [Write the purpose of the script here]

@@ -4,7 +4,6 @@ GNU General Public License v3.0
 
 Week 2/3 Lab — Step 2: Morphology (Opening)
 Clean a binary mask with erosion followed by dilation (an 'opening').
-Source: 02_OpenCV.ipynb (cv2.erode / cv2.dilate).
 """
 
 import drone_core

@@ -5,7 +5,6 @@ GNU General Public License v3.0
 Week 2/3 Lab — Step 1: PID Altitude Hold  (SOLUTION)
 Hold a target height with a full PID controller (P + I + D).
 Heights are measured above the ground sampled at launch.
-Source: simple_feedback_control.ipynb (pid_control, 1-D quad).
 """
 
 import drone_core

@@ -4,7 +4,6 @@ GNU General Public License v3.0
 
 Week 2/3 Lab — Step 2: Fit a Line (Least Squares)  (SOLUTION)
 Fit y = m*x + b to the bright edge pixels with linear regression.
-Source: 03_LinearRegression.ipynb (calculate_regression).
 """
 
 import drone_core

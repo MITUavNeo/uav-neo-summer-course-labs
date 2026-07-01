@@ -4,7 +4,6 @@ GNU General Public License v3.0
 
 Week 2/3 Lab — Step 3: Center Over the Gate
 Visual-servo the drone to hover directly above the gate frame.
-Source: 04_Downward.ipynb applied live (downward camera).
 """
 
 import drone_core

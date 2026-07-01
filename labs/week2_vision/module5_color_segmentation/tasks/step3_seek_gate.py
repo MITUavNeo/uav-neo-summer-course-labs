@@ -4,7 +4,6 @@ GNU General Public License v3.0
 
 Week 2/3 Lab — Step 3: Seek the Gate
 Yaw to center the largest cyan gate, then fly forward toward it.
-Source: 05_ColorSegmentation.ipynb applied live.
 """
 
 import drone_core
