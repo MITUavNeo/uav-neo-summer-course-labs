@@ -2,8 +2,7 @@
 MIT BWSI Autonomous Drone Racing Course - UAV Neo
 GNU General Public License v3.0
 
-Week 2/3 Lab — Step 1: Detect the Line Pixels
-Find the colored line pixels in the downward camera.
+Week 2 · Module 5 — Step 2: Estimate Range and Approach
 """
 
 import drone_core
@@ -22,32 +21,39 @@ if _d not in _sys.path:
 import neo_lab
 
 # -- Constants --------------------------------------------------------------
-S_MIN         = 100
-ADVANCE_PITCH = 0.15      # fly forward off the spawn pad to reach the line
-ADVANCE_TIME  = 8.0       # seconds of forward flight before reporting
+FOCAL_PX       = 320.0      # camera focal length in pixels (approx calibration)
+REAL_TAG_SIZE  = 0.30       # physical corner-tag side length, meters (approx)
+COL_CENTER     = 320
+STOP_DIST      = 2.0        # meters: close enough
+APPROACH_PITCH = 0.15
+MAX_YAW        = 0.2
+SEARCH_PITCH   = 0.1        # creep forward; ArUco tags only resolve up close
 
 # -- Module-level state -----------------------------------------------------
-_timer = 0.0
-_done  = False
+_done = False
 
 def reset():
-    global _timer, _done
-    _timer = 0.0
-    _done  = False
+    global _done
+    _done = False
 
 
 def update(drone):
-    global _timer, _done
+    global _done
     if _done:
         return True
-    drone.flight.stop()   # hover in place
     ##################################
     #### START PUT CODE HERE #########
 
-    # The drone spawns on a colored landing pad, so first fly forward (ADVANCE_PITCH) for
-    # ADVANCE_TIME to reach the line, then hover. The line is vivid against a grey floor, so
-    # threshold by saturation: neo_lab.saturated_mask(image, S_MIN) gives a mask of the line
-    # pixels. Count them, print the count, and set _done. See the README (Key terms).
+    # GOAL: fly toward the gate, estimating distance from its apparent tag size, and stop
+    # once distance <= STOP_DIST.
+    #
+    # Tools: drone.camera.get_color_image(); neo_lab.detect_gate(image) -> Gate or None;
+    #        a Gate has .cx (center column) and .tag_px (tag size in px); uav_utils.clamp(...);
+    #        drone.flight.send_pcmd(pitch, roll, yaw, throttle), drone.flight.stop().
+    #
+    # No gate -> creep forward (SEARCH_PITCH) until tags resolve. With a gate, invert the
+    # Module 1 projection: distance = FOCAL_PX * REAL_TAG_SIZE / tag_px. Yaw to keep .cx on
+    # COL_CENTER and add APPROACH_PITCH forward. Stop and finish once distance <= STOP_DIST.
 
     ###### END PUT CODE HERE #########
     ##################################
@@ -61,10 +67,10 @@ if __name__ == "__main__":
     def start():
         _launcher.reset()
         reset()
-        print("Step 1: Detect the Line Pixels")
+        print("Step 2: Estimate Range and Approach")
 
     def _update():
-        if not _launcher.done:        # arm + climb to a safe height first
+        if not _launcher.done:
             _launcher.update(_drone)
             return
         if update(_drone):

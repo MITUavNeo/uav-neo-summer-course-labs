@@ -23,100 +23,77 @@ import drone_utils as uav_utils
 _ground_alt = 0.0
 
 
-# ── Gate vision ─────────────────────────────────────────────────────────────────────
-# Gates are dark frames with glowing edges — cyan on the forward camera, white on the
-# downward camera. Both read as high "Value" in HSV, so brightness is the strongest
-# gate signal.
+# ── Colored line (line follower) ─────────────────────────────────────────────────────
+# The ground line is recolored each run, but always vivid against a grey floor, so HSV
+# Saturation isolates it regardless of which color the run picked.
 
-# Cyan gate edges on the forward camera (separates from the blue background ~hue 108).
-CYAN_LOWER = np.array([80, 40, 150], dtype=np.uint8)
-CYAN_UPPER = np.array([105, 255, 255], dtype=np.uint8)
-
-
-def bright_mask(image, v_min=200):
-    """Binary mask (0/255) of the glowing gate edges, by HSV Value (brightness)."""
+def saturated_mask(image, s_min=100):
+    """Binary mask (0/255) of vivid colored regions by HSV Saturation. Color-agnostic,
+    so it survives the per-run recoloring of the line."""
     hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
-    return (hsv[:, :, 2] > v_min).astype(np.uint8) * 255
+    return (hsv[:, :, 1] > s_min).astype(np.uint8) * 255
 
 
-def largest_bright_contour(image, v_min=200, min_area=200, dilate=2):
-    """Return the largest glowing-edge contour in the image, or None."""
-    mask = bright_mask(image, v_min)
-    if dilate:
-        mask = cv2.dilate(mask, np.ones((5, 5), np.uint8), iterations=dilate)
-    contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    best, best_area = None, float(min_area)
-    for c in contours:
-        area = cv2.contourArea(c)
-        if area > best_area:
-            best, best_area = c, area
-    return best
+# ── Gate markers (ArUco) ─────────────────────────────────────────────────────────────
+# Each gate carries four DICT_6X6_250 tags, one per corner. The neon strips share the
+# sky's blue hue, so color cannot separate a gate from the background; the tags can.
+
+# One visible tag gives only a gate corner; scale its side up to a rough full-gate span.
+_GATE_SPAN_PER_TAG_SIDE = 5.0
+_gate_dict = None
 
 
-def _gate_in_mask(mask, min_area=400, max_aspect=2.5, dilate=2):
-    """
-    Largest roughly-SQUARE bright contour in a binary mask, or None.
-    Gates are square frames (aspect ~1); the long glowing boundary lines have a
-    very elongated bounding box, so an aspect-ratio test rejects them.
-    """
-    if dilate:
-        mask = cv2.dilate(mask, np.ones((5, 5), np.uint8), iterations=dilate)
-    contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    best, best_area = None, float(min_area)
-    for c in contours:
-        area = cv2.contourArea(c)
-        if area <= best_area:
-            continue
-        x, y, w, h = cv2.boundingRect(c)
-        if w == 0 or h == 0 or max(w, h) / min(w, h) > max_aspect:
-            continue                       # too elongated -> a boundary line, not a gate
-        best, best_area = c, area
-    return best
+def _gate_aruco_dict():
+    global _gate_dict
+    if _gate_dict is None:
+        _gate_dict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_6X6_250)
+    return _gate_dict
 
 
-def largest_gate(image, v_min=200, min_area=400, max_aspect=2.5):
-    """Largest square-ish GLOWING gate (forward: cyan / downward: white), or None."""
-    return _gate_in_mask(bright_mask(image, v_min), min_area, max_aspect)
+def _detect_gate_markers(gray):
+    params = cv2.aruco.DetectorParameters()
+    try:
+        detector = cv2.aruco.ArucoDetector(_gate_aruco_dict(), params)
+        return detector.detectMarkers(gray)
+    except AttributeError:                   # OpenCV < 4.7 free-function API
+        return cv2.aruco.detectMarkers(gray, _gate_aruco_dict(), parameters=params)
 
 
-def largest_cyan_gate(image, min_area=400, max_aspect=2.5):
-    """Largest square-ish CYAN gate on the forward camera, or None."""
-    hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
-    mask = cv2.inRange(hsv, CYAN_LOWER, CYAN_UPPER)
-    return _gate_in_mask(mask, min_area, max_aspect)
+class Gate:
+    """A gate located from its corner ArUco tags: image center (cx, cy), inter-tag span
+    (gate size proxy), mean tag pixel size (a proximity signal that works with one tag),
+    and the decoded corner-tag ids."""
+
+    def __init__(self, cx, cy, span, tag_px, ids):
+        self.cx = cx
+        self.cy = cy
+        self.span = span
+        self.tag_px = tag_px
+        self.ids = ids
+        self.count = len(ids)
 
 
-def gate_nearest_to(image, target_col, v_min=200, min_area=500, max_aspect=2.5,
-                    dilate=2):
-    """
-    Square-ish glowing gate whose center column is closest to `target_col`, or None.
-
-    For yaw visual-servoing in a field of similar gates, picking the LARGEST gate
-    flickers between them. Track ONE gate instead: pass the previously-tracked gate's
-    column as `target_col` (start at the image center) and update it each frame. The
-    loop then locks onto a single gate and follows it as the drone turns.
-    """
-    mask = bright_mask(image, v_min)
-    if dilate:
-        mask = cv2.dilate(mask, np.ones((5, 5), np.uint8), iterations=dilate)
-    contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    best, best_dist = None, float("inf")
-    for c in contours:
-        if cv2.contourArea(c) < min_area:
-            continue
-        x, y, w, h = cv2.boundingRect(c)
-        if w == 0 or h == 0 or max(w, h) / min(w, h) > max_aspect:
-            continue
-        dist = abs((x + w / 2.0) - target_col)
-        if dist < best_dist:
-            best, best_dist = c, dist
-    return best
+def _tag_side(quad):
+    p = quad.reshape(-1, 2)
+    return float(np.linalg.norm(p[0] - p[1]))
 
 
-def gate_nearest_center(image, v_min=200, min_area=500, max_aspect=2.5, dilate=2):
-    """Square-ish gate nearest the image center (a one-shot gate_nearest_to)."""
-    return gate_nearest_to(image, image.shape[1] / 2.0, v_min, min_area,
-                           max_aspect, dilate)
+def detect_gate(image):
+    """Locate a gate by its DICT_6X6_250 corner tags on the forward camera. Returns a
+    Gate, or None when no tag is decoded. The center is the mean of the visible tags:
+    exact with all four, approximate with fewer."""
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    corners, ids, _ = _detect_gate_markers(gray)
+    if ids is None or len(ids) == 0:
+        return None
+    tag_centers = np.array([c.reshape(-1, 2).mean(axis=0) for c in corners])
+    cx, cy = tag_centers.mean(axis=0)
+    tag_px = float(np.mean([_tag_side(c) for c in corners]))
+    if len(tag_centers) >= 2:
+        span = max(np.linalg.norm(a - b) for a in tag_centers for b in tag_centers)
+    else:
+        span = tag_px * _GATE_SPAN_PER_TAG_SIDE
+    return Gate(float(cx), float(cy), float(span), tag_px, [int(i) for i in ids.flatten()])
 
 
 def set_ground(alt):
@@ -136,10 +113,11 @@ def height(drone):
 
 
 def world_position(drone):
-    """True world position (x_east, y_up, z_north) in meters, straight from the sim.
+    """World position (x_east, y_up, z_north) in meters.
 
-    Uses the drone's direct position readout (no drift, no GPS round-trip). Requires a
-    simulator build new enough to support it.
+    On the sim this is ground truth. On the real drone it is the flight controller's EKF
+    local position, whose origin is wherever the EKF initialized rather than a fixed world
+    origin -- so absolute values differ from the sim, but relative motion matches.
     """
     return tuple(float(v) for v in drone.physics.get_position())
 
@@ -151,7 +129,7 @@ def world_position(drone):
 # error into tilt -- the job the real flight controller does in hardware. Writing the labs
 # against send_velocity keeps the student controller identical across sim and real.
 
-REAL_MAX_SPEED = 2.0     # m/s mapped to a full normalized command; MUST match the mux config
+REAL_MAX_SPEED = 0.5     # m/s mapped to a full normalized command; MUST match mux.yaml max_speed
 _SIM_VEL_KP = 0.3        # sim inner loop: tilt per (m/s) of horizontal velocity error
 _SIM_VZ_MPS = 12.0       # sim throttle scale: ~12 m/s of vertical velocity per unit throttle
 _SIM_TILT_LIMIT = 0.5   # keep tilt gentle: the sim's attitude response is fast and high-authority

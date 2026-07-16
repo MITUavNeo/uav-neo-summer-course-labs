@@ -2,8 +2,7 @@
 MIT BWSI Autonomous Drone Racing Course - UAV Neo
 GNU General Public License v3.0
 
-Week 2/3 Lab — Step 1: Detect the Line Pixels
-Find the colored line pixels in the downward camera.
+Week 2 · Module 5 — Step 1: Measure a Gate Tag's Apparent Size  (SOLUTION)
 """
 
 import drone_core
@@ -22,35 +21,36 @@ if _d not in _sys.path:
 import neo_lab
 
 # -- Constants --------------------------------------------------------------
-S_MIN         = 100
-ADVANCE_PITCH = 0.15      # fly forward off the spawn pad to reach the line
-ADVANCE_TIME  = 8.0       # seconds of forward flight before reporting
+SEARCH_PITCH   = 0.1        # creep forward; ArUco tags only resolve up close
+SEARCH_TIMEOUT = 15.0       # give up if no gate decodes in this many seconds
 
 # -- Module-level state -----------------------------------------------------
 _timer = 0.0
-_done  = False
+_done = False
 
 def reset():
     global _timer, _done
     _timer = 0.0
-    _done  = False
+    _done = False
 
 
 def update(drone):
     global _timer, _done
     if _done:
         return True
-    drone.flight.stop()   # hover in place
-    ##################################
-    #### START PUT CODE HERE #########
-
-    # The drone spawns on a colored landing pad, so first fly forward (ADVANCE_PITCH) for
-    # ADVANCE_TIME to reach the line, then hover. The line is vivid against a grey floor, so
-    # threshold by saturation: neo_lab.saturated_mask(image, S_MIN) gives a mask of the line
-    # pixels. Count them, print the count, and set _done. See the README (Key terms).
-
-    ###### END PUT CODE HERE #########
-    ##################################
+    _timer += drone.get_delta_time()
+    image = drone.camera.get_color_image()
+    gate = neo_lab.detect_gate(image)
+    if gate is not None:
+        drone.flight.stop()
+        print(f"[Step 1] Gate tag apparent size = {gate.tag_px:.0f} px ({gate.count} tags)")
+        _done = True
+    elif _timer >= SEARCH_TIMEOUT:
+        drone.flight.stop()
+        print("[Step 1] No gate found within the time limit")
+        _done = True
+    else:
+        drone.flight.send_pcmd(SEARCH_PITCH, 0, 0, 0)   # approach until tags resolve
     return _done
 
 
@@ -61,10 +61,10 @@ if __name__ == "__main__":
     def start():
         _launcher.reset()
         reset()
-        print("Step 1: Detect the Line Pixels")
+        print("Step 1: Measure a Gate Tag's Apparent Size")
 
     def _update():
-        if not _launcher.done:        # arm + climb to a safe height first
+        if not _launcher.done:
             _launcher.update(_drone)
             return
         if update(_drone):

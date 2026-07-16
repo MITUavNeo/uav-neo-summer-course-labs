@@ -79,7 +79,7 @@ to the target point, brakes, holds, and lands.
 
 ## Going further (optional)
 
-- The dead-reckoned position drifts. After arriving, how far off is the true position? How could the downward camera (Module 7 optical flow) correct it?
+- The dead-reckoned position drifts. After arriving, how far off is the true position? How could the downward camera (Module 6 optical flow) correct it?
 - Add a final yaw so the drone faces its direction of travel before moving.
 - Chain two waypoints back to back — the next module turns this into a full pattern.
 

@@ -2,10 +2,10 @@
 MIT BWSI Autonomous Drone Racing Course - UAV Neo
 GNU General Public License v3.0
 
-Week 2 · Module 3 — Linear Regression (Line Following) — Main orchestrator
+Week 2 · Module 5 — Distance Estimation — Main orchestrator
 
 Runs every step in sequence against the simulator:
-    drone sim module3_linear_regression/main.py
+    drone sim module5_distance_estimation/main.py
 Run a single step directly instead:
     drone sim tasks/<step_file>.py
 """
@@ -20,13 +20,11 @@ if _d not in _sys.path:
 import neo_lab
 
 from tasks import (
-    step1_detect_line,
-    step2_fit_line,
-    step3_follow_line,
+    step1_measure_width,
+    step2_estimate_range,
 )
 
-neo_lab.run_module("Week 2 · Module 3 — Linear Regression (Line Following)", [
-    ("Step 1: Detect the Line Pixels", step1_detect_line),
-    ("Step 2: Fit a Line (Least Squares)", step2_fit_line),
-    ("Step 3: Follow the Line", step3_follow_line),
+neo_lab.run_module("Week 2 · Module 5 — Distance Estimation", [
+    ("Step 1: Measure a Gate Tag's Apparent Size", step1_measure_width),
+    ("Step 2: Estimate Range and Approach", step2_estimate_range),
 ])

@@ -3,8 +3,7 @@ MIT BWSI Autonomous Drone Racing Course - UAV Neo
 GNU General Public License v3.0
 
 Week 2/3 Lab — Step 3: Visual Servoing (Vision + PID)
-Capstone: use a PID loop on the camera pixel error to keep a glowing
-gate centered by yawing. Combines Week 2 vision with Week 3 control.
+Use a PID loop on the camera pixel error to keep a gate centered by yawing.
 """
 
 import drone_core
@@ -23,8 +22,6 @@ if _d not in _sys.path:
 import neo_lab
 
 # -- Constants --------------------------------------------------------------
-V_MIN = 200
-MIN_AREA = 500
 COL_CENTER = 320
 KP = 0.35
 KI = 0.0
@@ -37,7 +34,6 @@ HOLD_TIME = 1.0
 # -- Module-level state -----------------------------------------------------
 _err_int = 0.0
 _prev_err = 0.0
-_target_col = None
 _hold = 0.0
 _done = False
 
@@ -51,32 +47,30 @@ def pid_control(err, err_int, err_dot, kp, ki, kd):
     return output
 
 def reset():
-    global _err_int, _prev_err, _target_col, _hold, _done
+    global _err_int, _prev_err, _hold, _done
     _err_int = 0.0
     _prev_err = 0.0
-    _target_col = None
     _hold = 0.0
     _done = False
 
 
 def update(drone):
-    global _err_int, _prev_err, _target_col, _hold, _done
+    global _err_int, _prev_err, _hold, _done
     if _done:
         return True
     ##################################
     #### START PUT CODE HERE #########
 
-    # GOAL: yaw with a PID loop so a glowing gate stays centered in the forward
-    # camera; finish once it is centered (abs(error) < CENTER_TOL) for HOLD_TIME.
+    # GOAL: yaw with a PID loop so a gate stays centered in the forward camera;
+    # finish once it is centered (abs(error) < CENTER_TOL) for HOLD_TIME.
     #
     # Available helpers: drone.camera.get_color_image(); drone.get_delta_time();
-    #   neo_lab.gate_nearest_center(...) and neo_lab.gate_nearest_to(...) to find gates;
-    #   uav_utils.get_contour_center; uav_utils.clamp; your pid_control() above.
+    #   neo_lab.detect_gate(image) -> Gate or None (a Gate has .cx, the gate's center
+    #   column); uav_utils.clamp; your pid_control() above.
     #
-    # Lock onto ONE gate (store its column in _target_col) so the target does not jump
-    # between gates. Turn the gate's horizontal offset from the image center into a
+    # Turn the gate's horizontal offset from the image center (.cx vs COL_CENTER) into a
     # normalized error, PID it to a yaw command clamped to MAX_YAW, and sweep at SEARCH_YAW
-    # when no gate is in view. See the README (Key terms) and Week 2 for finding gates.
+    # when no gate is in view. See the README (Key terms) and Week 2 Module 5 for detect_gate.
 
     ###### END PUT CODE HERE #########
     ##################################

@@ -3,7 +3,7 @@ MIT BWSI Autonomous Drone Racing Course - UAV Neo
 GNU General Public License v3.0
 
 Week 2/3 Lab — Step 2: Fit a Line (Least Squares)  (SOLUTION)
-Fit y = m*x + b to the bright edge pixels with linear regression.
+Fit y = m*x + b to the colored line pixels with linear regression.
 """
 
 import drone_core
@@ -22,9 +22,10 @@ if _d not in _sys.path:
 import neo_lab
 
 # -- Constants --------------------------------------------------------------
-V_MIN      = 200
-MIN_PIXELS = 200
-HOVER_TIME = 3.0
+S_MIN         = 100
+MIN_PIXELS    = 200
+ADVANCE_PITCH = 0.15      # fly forward off the spawn pad to reach the line
+ADVANCE_TIME  = 8.0       # seconds of forward flight before fitting
 
 # -- Module-level state -----------------------------------------------------
 _timer = 0.0
@@ -49,17 +50,19 @@ def update(drone):
     global _timer, _done
     if _done:
         return True
-    drone.flight.stop()   # hover in place
     _timer += drone.get_delta_time()
+    if _timer < ADVANCE_TIME:
+        drone.flight.send_pcmd(ADVANCE_PITCH, 0, 0, 0)   # fly off the spawn pad to the line
+        return False
+    drone.flight.stop()
     image = drone.camera.get_downward_image()
-    mask = neo_lab.bright_mask(image, V_MIN) > 0
+    mask = neo_lab.saturated_mask(image, S_MIN) > 0
     points = np.argwhere(mask)             # array of (row, col)
     if len(points) < MIN_PIXELS:
-        return False                        # not enough edge in view yet
+        return False                        # not enough line in view yet
     m, b = fit_line(points)
-    if _timer >= HOVER_TIME:
-        print(f"[Step 2] Fitted edge slope m={m:.3f}, intercept b={b:.1f}")
-        _done = True
+    print(f"[Step 2] Fitted line slope m={m:.3f}, intercept b={b:.1f}")
+    _done = True
     return _done
 
 

@@ -2,10 +2,10 @@
 MIT BWSI Autonomous Drone Racing Course - UAV Neo
 GNU General Public License v3.0
 
-Week 2 · Module 3 — Linear Regression (Line Following) (SOLUTION) — Main orchestrator
+Week 2 · Module 4 — Gate Markers (Seek a Gate) (SOLUTION) — Main orchestrator
 
 Runs every step in sequence against the simulator:
-    drone sim module3_linear_regression/main_solution.py
+    drone sim module4_gate_markers/main_solution.py
 Run a single step directly instead:
     drone sim solutions/<step_file>.py
 """
@@ -20,13 +20,13 @@ if _d not in _sys.path:
 import neo_lab
 
 from solutions import (
-    step1_detect_line,
-    step2_fit_line,
-    step3_follow_line,
+    step1_detect_markers,
+    step2_locate_gate,
+    step3_seek_gate,
 )
 
-neo_lab.run_module("Week 2 · Module 3 — Linear Regression (Line Following) (SOLUTION)", [
-    ("Step 1: Detect the Line Pixels", step1_detect_line),
-    ("Step 2: Fit a Line (Least Squares)", step2_fit_line),
-    ("Step 3: Follow the Line", step3_follow_line),
+neo_lab.run_module("Week 2 · Module 4 — Gate Markers (Seek a Gate) (SOLUTION)", [
+    ("Step 1: Detect Gate Markers", step1_detect_markers),
+    ("Step 2: Locate the Gate", step2_locate_gate),
+    ("Step 3: Seek the Gate", step3_seek_gate),
 ])

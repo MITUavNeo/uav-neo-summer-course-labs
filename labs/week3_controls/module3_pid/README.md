@@ -111,7 +111,7 @@ Press **Enter** in the simulator window to start.
 
 1. **`step1_pid_altitude.py`** — hold a target height with a full PID controller
 2. **`step2_position_hold.py`** — fly a set distance forward (PID on integrated position)
-3. **`step3_visual_servo.py`** — yaw with a PID loop to lock onto a glowing gate
+3. **`step3_visual_servo.py`** — yaw with a PID loop to lock onto a gate
 4. **`step4_track_reference.py`** — follow a height that keeps moving, using PID + feedforward
 
 ## What to expect
@@ -133,7 +133,7 @@ rising-and-falling height reference, and land.
 | `NameError: name 'image' is not defined` (Step 3) | Capture the frame: `image = drone.camera.get_color_image()`. |
 | Altitude oscillates and grows | Integral windup — make sure you clamp `_err_int` to `±INT_CLAMP`, and add some `Kd`. |
 | Step 2 overshoots the distance | Use velocity as the derivative term (`err_dot = -velocity[2]`) so it brakes early; raise `KD`. |
-| Step 3 jumps between gates and never locks | Track one gate: store `_target_col` and use `gate_nearest_to`, not `gate_nearest_center`, after the first frame. |
+| Step 3 never sees a gate | ArUco tags only decode up close — start within a few meters of a gate so its corner tags are readable. |
 | Step never finishes | Check your "settled" timer logic — it must require staying within tolerance for the full hold time. |
 | Step 4 always trails the target (large max error) | You left out the feedforward — add `KFF * r_dot` to the throttle so you command the target's speed, not just react to error. |
 

@@ -180,11 +180,10 @@ drone.go()
 |--------|------|-------|
 | `module1_image_formation`    | concept   | Pinhole camera model: projection, pixels, intrinsics, distortion |
 | `module2_opencv`             | simulator | Thresholding & morphology on the live downward camera |
-| `module3_linear_regression`  | simulator | Fit a line (least squares) to glowing edges, then follow one |
-| `module4_downward`           | simulator | Contour analysis: detect & center over a gate (downward camera) |
-| `module5_color_segmentation` | simulator | HSV color segmentation → search, center, and reach a cyan gate |
-| `module6_distance_estimation`| simulator | Range to a gate from apparent size (inverse of Module 1) |
-| `module7_optical_flow`       | simulator | Estimate ground velocity from the downward camera |
+| `module3_linear_regression`  | simulator | Fit a line (least squares) to the ground line, then follow it |
+| `module4_gate_markers`       | simulator | Detect a gate by its ArUco corner tags, then search and reach it |
+| `module5_distance_estimation`| simulator | Range to a gate from a tag's apparent size (inverse of Module 1) |
+| `module6_optical_flow`       | simulator | Estimate ground velocity from the downward camera |
 
 ### Week 3 — Controls (`labs/week3_controls/`)
 

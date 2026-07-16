@@ -38,7 +38,7 @@ with distance from the image center. Robotics code usually *undistorts* an image
 measuring anything in it.
 
 Why it matters: every later vision lab — following an edge, centering on a gate, estimating
-range — depends on this map between pixels and the world. Module 6 literally runs it backward
+range — depends on this map between pixels and the world. Module 5 literally runs it backward
 to recover distance from a gate's pixel width.
 
 ## Key terms
