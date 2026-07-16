@@ -1,3 +1,5 @@
+dne
+dne
 # Week 2 · Module 2 — OpenCV (Thresholding & Morphology)
 
 Core image-processing operations applied to the drone's live downward camera.

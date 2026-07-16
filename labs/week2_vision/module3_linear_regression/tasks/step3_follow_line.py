@@ -45,7 +45,23 @@ def update(drone):
         return True
     ##################################
     #### START PUT CODE HERE #########
+    _timer += drone.get_delta_time()
+    image = drone.camera.get_downward_image()
+    mask = neo_lab.bright_mask(image, V_MIN) > 0
+    points = np.argwhere(mask)
 
+    if len(points) < MIN_PIXELS:
+        drone.flight.stop()             
+    else:
+        edge_col = points[:, 1].mean()  
+        offset = (edge_col - IMAGE_CENTER) / IMAGE_CENTER
+        roll = uav_utils.clamp(offset * MAX_ROLL, -MAX_ROLL, MAX_ROLL)
+        drone.flight.send_pcmd(FORWARD_PITCH, roll, 0, 0)
+    if _timer >= FOLLOW_TIME:
+        drone.flight.stop()
+        print("Finished following the edge")
+        _done = True
+    
     # GOAL: fly forward at FORWARD_PITCH while strafing (roll) to keep the bright
     # edge under the middle of the downward camera.
     #

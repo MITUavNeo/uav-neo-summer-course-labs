@@ -6,6 +6,8 @@ Week 2/3 Lab — Step 3: Seek the Gate
 Yaw to center the largest cyan gate, then fly forward toward it.
 """
 
+from email.mime import image
+
 import drone_core
 import drone_utils as uav_utils
 import cv2
@@ -44,14 +46,28 @@ def update(drone):
         return True
     ##################################
     #### START PUT CODE HERE #########
-
+    image = drone.camera.get_color_image()
+    best = neo_lab.largest_cyan_gate(image, MIN_AREA)
+    if best is None:
+        drone.flight.send_pcmd(0, 0, SEARCH_YAW, 0)  
+        return False
+    x, y, w, h = cv2.boundingRect(best)
+    gate_col = x + w / 2.0
+    err = (gate_col - COL_CENTER) / COL_CENTER       
+    yaw = uav_utils.clamp(err * MAX_YAW, -MAX_YAW, MAX_YAW)
+    pitch = APPROACH_PITCH if abs(gate_col - COL_CENTER) < CENTER_TOL else 0.0
+    drone.flight.send_pcmd(pitch, 0, yaw, 0)
+    if w >= TARGET_WIDTH:
+        drone.flight.stop()
+        print(f" Reached the gate (width={w}px)")
+        _done = True
     # GOAL: spin until a cyan gate is found, yaw to center it, then fly forward until
     # it fills the view (bounding-box width >= TARGET_WIDTH).
     #
     # Tools: drone.camera.get_color_image(); neo_lab.largest_cyan_gate(image, MIN_AREA);
     #        cv2.boundingRect(contour) -> (x, y, w, h); uav_utils.clamp(...);
     #        drone.flight.send_pcmd(pitch, roll, yaw, throttle).
-    #
+    
     # No gate in view -> turn slowly (SEARCH_YAW) to find one. With a gate, the box
     # center column vs. COL_CENTER gives a yaw error; only add forward pitch once it is
     # roughly centered (within CENTER_TOL) so you turn toward it before chasing. The box

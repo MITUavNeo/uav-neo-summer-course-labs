@@ -54,6 +54,20 @@ def update(drone):
     ##################################
     #### START PUT CODE HERE #########
 
+    _timer += drone.get_delta_time()
+    image = drone.camera.get_downward_image()
+    mask = neo_lab.bright_mask(image, V_MIN) > 0
+    points = np.argwhere(mask)
+
+    if len(points) < MIN_PIXELS:
+        return False
+
+    m, b = fit_line(points)
+
+    if _timer >= HOVER_TIME:
+        print(f"m={m:.3f}, b={b:.1f}")
+        _done = True
+
     # Build the bright-edge mask like Step 1 and collect the (row, col) of every bright
     # pixel. If there are fewer than MIN_PIXELS, there is not enough edge to fit -> return
     # False. Otherwise call fit_line() and print m, b. Advance _timer and finish at

@@ -40,6 +40,7 @@ def update(drone):
     if _done:
         return True
     drone.flight.stop()   # hover in place
+    
     _timer += drone.get_delta_time()
     image = drone.camera.get_downward_image()
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)

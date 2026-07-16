@@ -6,6 +6,8 @@ Week 2/3 Lab — Step 3: Center Over the Gate
 Visual-servo the drone to hover directly above the gate frame.
 """
 
+from email.mime import image
+
 import drone_core
 import drone_utils as uav_utils
 import cv2
@@ -46,7 +48,26 @@ def update(drone):
         return True
     ##################################
     #### START PUT CODE HERE #########
-
+    image = drone.camera.get_downward_image()
+    best = neo_lab.largest_bright_contour(image, V_MIN, MIN_AREA)
+    if best is None:
+        drone.flight.stop()
+        _hold = 0.0
+        return False
+    row, col = uav_utils.get_contour_center(best)
+    err_col = col - COL_CENTER       
+    err_row = row - ROW_CENTER
+    pitch = uav_utils.clamp(-err_row / ROW_CENTER * MAX_TILT, -MAX_TILT, MAX_TILT)            
+    roll = uav_utils.clamp(err_col / COL_CENTER * MAX_TILT, -MAX_TILT, MAX_TILT)
+    drone.flight.send_pcmd(pitch, roll, 0, 0)
+    if abs(err_col) < CENTER_TOL and abs(err_row) < CENTER_TOL:
+        _hold += drone.get_delta_time()
+    else:
+        _hold = 0.0
+    if _hold >= HOLD_TIME:
+        drone.flight.stop()
+        print("[Step 3] Centered over the gate")
+        _done = True 
     # GOAL: move with pitch/roll until the gate sits in the middle of the downward
     # camera, hold that for HOLD_TIME, then finish.
     #
