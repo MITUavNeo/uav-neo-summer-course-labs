@@ -28,7 +28,8 @@ KP = 0.35
 KI = 0.0
 KD = 0.2
 MAX_YAW = 0.25
-SEARCH_YAW = 0.2
+SEARCH_YAW = 0.15    # slow yaw while searching
+SEARCH_PITCH = 0.1   # creep forward while searching; ArUco tags decode only up close
 CENTER_TOL = 0.15    # normalized error considered centered
 HOLD_TIME = 1.0
 SEARCH_TIMEOUT = 15.0  # land instead of scanning forever if no gate is ever seen
@@ -67,7 +68,7 @@ def update(drone):
             print("[Step 3] No gate seen; landing. Start facing a gate, up close.")
             _done = True
             return True
-        drone.flight.send_pcmd(0, 0, SEARCH_YAW, 0)   # scan for a gate
+        drone.flight.send_pcmd(SEARCH_PITCH, 0, SEARCH_YAW, 0)   # creep forward + scan; tags decode only up close
         _err_int = 0.0                           # reset integral when target is lost
         _hold = 0.0
         return False

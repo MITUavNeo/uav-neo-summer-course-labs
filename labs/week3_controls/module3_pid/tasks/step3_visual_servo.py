@@ -27,7 +27,8 @@ KP = 0.35
 KI = 0.0
 KD = 0.2
 MAX_YAW = 0.25
-SEARCH_YAW = 0.2
+SEARCH_YAW = 0.15    # slow yaw while searching
+SEARCH_PITCH = 0.1   # creep forward while searching; ArUco tags decode only up close
 CENTER_TOL = 0.15    # normalized error considered centered
 HOLD_TIME = 1.0
 SEARCH_TIMEOUT = 15.0  # land instead of scanning forever if no gate is ever seen
@@ -72,8 +73,9 @@ def update(drone):
     #   column); uav_utils.clamp; your pid_control() above.
     #
     # Turn the gate's horizontal offset from the image center (.cx vs COL_CENTER) into a
-    # normalized error, PID it to a yaw command clamped to MAX_YAW, and sweep at SEARCH_YAW
-    # when no gate is in view. Count time without a gate and land once it passes SEARCH_TIMEOUT,
+    # normalized error, PID it to a yaw command clamped to MAX_YAW, and when no gate is in view
+    # creep forward (SEARCH_PITCH) while sweeping (SEARCH_YAW) so the tags get close enough to
+    # decode. Count time without a gate and land once it passes SEARCH_TIMEOUT,
     # so a missing gate ends the lab instead of spinning forever. See the README (Key terms) and
     # Week 2 Module 5 for detect_gate.
 
