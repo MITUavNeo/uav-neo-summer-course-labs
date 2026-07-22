@@ -22,7 +22,7 @@ import neo_lab
 SIDE = 3.0
 WAYPOINTS = [(0.0, SIDE), (SIDE, SIDE), (SIDE, 0.0), (0.0, 0.0)]
 TARGET_HEIGHT = 3.0
-KP_POS = 0.18          # target speed (m/s) per meter of position error
+KP_POS = 0.6           # target speed (m/s) per meter of position error
 WP_TOL = 0.6
 
 # -- Module-level state -----------------------------------------------------

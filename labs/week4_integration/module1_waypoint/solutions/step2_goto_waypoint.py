@@ -23,7 +23,7 @@ import neo_lab
 TARGET_RIGHT = 2.0
 TARGET_FWD = 4.0
 TARGET_HEIGHT = 3.0
-KP_POS = 0.15          # target speed (m/s) per meter of position error
+KP_POS = 0.6           # target speed (m/s) per meter of position error
 POS_TOL = 0.5
 SETTLE_SPEED = 0.25
 HOLD_TIME = 1.5

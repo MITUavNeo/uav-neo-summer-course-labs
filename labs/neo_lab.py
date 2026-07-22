@@ -165,7 +165,7 @@ def send_velocity(drone, v_right, v_up, v_forward, yaw_rate=0.0):
         )
 
 
-_ALT_HOLD_KP = 1.5      # m/s of vertical correction per meter of altitude error
+_ALT_HOLD_KP = 0.6      # m/s of vertical correction per meter of altitude error (matches module3_trajectory)
 _ALT_HOLD_MAX = 1.5     # m/s cap on the altitude-hold correction
 
 
