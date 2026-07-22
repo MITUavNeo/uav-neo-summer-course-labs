@@ -392,7 +392,10 @@ def run_module(title, steps, launch_height=3.0, autostart=None, led_color=None,
                 print("\n=== Module complete! Landing... ===")
 
     def update_slow():
-        if launcher.done and state["i"] < len(steps):
+        if not launcher.done:
+            waiting = "" if _is_sim(drone) else "  (waiting: safety pilot must arm + OFFBOARD)"
+            print(f"[launch] climbing to {launch_height:.1f}m, height={height(drone):.2f}m{waiting}")
+        elif state["i"] < len(steps):
             print(f"[{steps[state['i']][0]}] height={height(drone):.2f}m")
 
     drone.set_start_update(start, update, update_slow)
