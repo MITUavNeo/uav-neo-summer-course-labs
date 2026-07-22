@@ -26,31 +26,39 @@ if _d not in sys.path:
 import neo_lab
 
 OUT_DIR = "/tmp"
-WARMUP_FRAMES = 10   # let the camera stream settle before grabbing
+CAPTURE_TIMEOUT_FRAMES = 150   # wait this many frames for the camera stream before giving up
 _frame = 0
 _done = False
 
 
-def _report(drone):
-    forward = drone.camera.get_color_image()
-    downward = drone.camera.get_downward_image()
-    print(f"[shape] forward={forward.shape}  downward={downward.shape}")
+def _report(forward, downward):
+    fwd_ok = forward is not None
+    down_ok = downward is not None
+    print(f"[shape] forward="
+          f"{forward.shape if fwd_ok else 'None - no frame from the forward camera'}   "
+          f"downward="
+          f"{downward.shape if down_ok else 'None - no frame from the downward camera'}")
 
-    gate = neo_lab.detect_gate(forward)
-    if gate is None:
-        print("[gate] forward: no ArUco tags decoded (aim at a gate, up close)")
-    else:
-        print(f"[gate] forward: {gate.count} tag(s) ids={gate.ids} "
-              f"center=({gate.cx:.0f},{gate.cy:.0f}) tag_px={gate.tag_px:.1f}")
+    if fwd_ok:
+        gate = neo_lab.detect_gate(forward)
+        if gate is None:
+            print("[gate] forward: no ArUco tags decoded (aim at a gate, up close)")
+        else:
+            print(f"[gate] forward: {gate.count} tag(s) ids={gate.ids} "
+                  f"center=({gate.cx:.0f},{gate.cy:.0f}) tag_px={gate.tag_px:.1f}")
+        cv2.imwrite(os.path.join(OUT_DIR, "cam_forward.png"), forward)
 
-    mask = neo_lab.saturated_mask(downward)
-    coverage = 100.0 * float((mask > 0).mean())
-    print(f"[line] downward: {coverage:.1f}% saturated (line) pixels")
+    if down_ok:
+        mask = neo_lab.saturated_mask(downward)
+        coverage = 100.0 * float((mask > 0).mean())
+        print(f"[line] downward: {coverage:.1f}% saturated (line) pixels")
+        cv2.imwrite(os.path.join(OUT_DIR, "cam_downward.png"), downward)
+        cv2.imwrite(os.path.join(OUT_DIR, "cam_line_mask.png"), mask)
 
-    cv2.imwrite(os.path.join(OUT_DIR, "cam_forward.png"), forward)
-    cv2.imwrite(os.path.join(OUT_DIR, "cam_downward.png"), downward)
-    cv2.imwrite(os.path.join(OUT_DIR, "cam_line_mask.png"), mask)
-    print(f"[saved] cam_forward.png / cam_downward.png / cam_line_mask.png in {OUT_DIR}")
+    if not (fwd_ok and down_ok):
+        print("[hint] a None frame means that camera's driver is not publishing - check the "
+              "camera connection and that the ROS 2 camera node is running.")
+    print(f"[saved] wrote the available frames to {OUT_DIR}")
 
 
 if __name__ == "__main__":
@@ -64,8 +72,10 @@ if __name__ == "__main__":
         if _done:
             return
         _frame += 1
-        if _frame >= WARMUP_FRAMES:
-            _report(_drone)
+        forward = _drone.camera.get_color_image()
+        downward = _drone.camera.get_downward_image()
+        if (forward is not None and downward is not None) or _frame >= CAPTURE_TIMEOUT_FRAMES:
+            _report(forward, downward)
             _done = True
 
     _drone.set_start_update(start, _update)
