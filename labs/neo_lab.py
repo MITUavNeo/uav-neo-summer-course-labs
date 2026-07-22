@@ -177,6 +177,11 @@ def altitude_hold_velocity(drone, target_height):
                            -_ALT_HOLD_MAX, _ALT_HOLD_MAX)
 
 
+# Takeoff height in meters above the ground where the program starts. Kept low for constrained
+# indoor spaces; every lab that does not pass its own height launches to this.
+DEFAULT_LAUNCH_HEIGHT = 1.0
+
+
 class Launcher:
     """
     Arms the drone and climbs to `target_height` meters above the ground measured
@@ -186,7 +191,7 @@ class Launcher:
     vertical scaling lives in one place instead of a launcher-local throttle gain.
     """
 
-    def __init__(self, target_height=3.0, climb_kp=1.0, max_climb_speed=2.0,
+    def __init__(self, target_height=DEFAULT_LAUNCH_HEIGHT, climb_kp=1.0, max_climb_speed=2.0,
                  tol=0.4, arm_time=1.5, settle=1.0):
         self.target_height = target_height
         self.climb_kp = climb_kp
@@ -314,7 +319,7 @@ def _autostart_enabled(autostart, drone):
     return not _is_sim(drone)   # real drone runs controller-free; the sim waits for its start key
 
 
-def run_module(title, steps, launch_height=3.0, autostart=None, led_color=None,
+def run_module(title, steps, launch_height=DEFAULT_LAUNCH_HEIGHT, autostart=None, led_color=None,
                launch=None):
     """Standard lab orchestrator: create the drone, arm and climb, then run each step in
     order and land. `steps` is a list of (label, module) where each module has reset()

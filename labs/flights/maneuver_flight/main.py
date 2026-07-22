@@ -23,7 +23,7 @@ import neo_lab
 
 import step_maneuver
 
-LAUNCH_HEIGHT_M = 1.5
+LAUNCH_HEIGHT_M = 1.0
 
 neo_lab.run_module(
     "Flight B - Maneuver",
