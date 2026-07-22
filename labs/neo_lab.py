@@ -51,11 +51,12 @@ def _gate_aruco_dict():
 
 
 def _detect_gate_markers(gray):
-    params = cv2.aruco.DetectorParameters()
     try:
-        detector = cv2.aruco.ArucoDetector(_gate_aruco_dict(), params)
+        detector = cv2.aruco.ArucoDetector(_gate_aruco_dict(), cv2.aruco.DetectorParameters())
         return detector.detectMarkers(gray)
     except AttributeError:                   # OpenCV < 4.7 free-function API
+        # params must come from _create() here: the direct constructor segfaults detectMarkers
+        params = cv2.aruco.DetectorParameters_create()
         return cv2.aruco.detectMarkers(gray, _gate_aruco_dict(), parameters=params)
 
 
