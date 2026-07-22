@@ -51,8 +51,10 @@ drone sim course/week2_vision/module5_distance_estimation/main.py            # a
 drone sim course/week2_vision/module5_distance_estimation/main_solution.py   # reference flight
 ```
 
-Load a gate scene (e.g. **LabD_GateNavigation**) with a gate ahead, then press **Enter** in the
-simulator window to start.
+Load a gate scene (e.g. **LabD_GateNavigation**). The ArUco tags only decode up close, so from
+the spawn point they are usually unreadable — **manually fly the drone up near a gate before you
+start**, so the script has a tag to measure. Then press **Enter** in the simulator window to
+hand control to your script.
 
 ## Steps
 
