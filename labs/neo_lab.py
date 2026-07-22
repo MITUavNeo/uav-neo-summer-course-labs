@@ -192,7 +192,7 @@ class Launcher:
     """
 
     def __init__(self, target_height=DEFAULT_LAUNCH_HEIGHT, climb_kp=1.0, max_climb_speed=2.0,
-                 tol=0.4, arm_time=1.5, settle=1.0):
+                 tol=0.25, arm_time=0.5, settle=1.0):
         self.target_height = target_height
         self.climb_kp = climb_kp
         self.max_climb_speed = max_climb_speed
