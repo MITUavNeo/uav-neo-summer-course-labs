@@ -23,8 +23,8 @@ if _d not in _sys.path:
 import neo_lab
 
 # -- Constants --------------------------------------------------------------
-BASE_HEIGHT = 3.0
-AMPLITUDE = 1.5
+BASE_HEIGHT = 0.6
+AMPLITUDE = 0.3
 PERIOD = 6.0
 CYCLES = 2
 DURATION = PERIOD * CYCLES

@@ -20,7 +20,7 @@ import neo_lab
 # -- Constants --------------------------------------------------------------
 SIDE = 3.0
 WAYPOINTS = [(0.0, SIDE), (SIDE, SIDE), (SIDE, 0.0), (0.0, 0.0)]
-TARGET_HEIGHT = 3.0
+TARGET_HEIGHT = 1.0
 KP_POS = 0.6           # target speed (m/s) per meter of position error
 WP_TOL = 0.6
 

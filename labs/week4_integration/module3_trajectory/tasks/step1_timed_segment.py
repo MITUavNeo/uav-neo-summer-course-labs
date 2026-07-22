@@ -24,7 +24,7 @@ import neo_lab
 # -- Constants --------------------------------------------------------------
 GOAL_RIGHT = 2.0
 GOAL_FWD = 6.0
-TARGET_HEIGHT = 3.0
+TARGET_HEIGHT = 1.0
 DURATION = 5.0        # seconds to fly the segment
 KP_POS = 0.6          # position error -> velocity (1/s): how hard to close a position gap
 ALT_KP = 0.6          # altitude error -> vertical velocity (1/s)

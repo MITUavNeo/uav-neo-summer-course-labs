@@ -21,13 +21,13 @@ if _d not in _sys.path:
 import neo_lab
 
 # -- Constants --------------------------------------------------------------
-TARGET_HEIGHT = 5.0
+TARGET_HEIGHT = 0.5
 KP = 0.18
 KI = 0.06
 KD = 0.02
 INT_CLAMP = 3.0      # anti-windup limit on the integral
 THROTTLE_LIMIT = 0.5
-TOL = 0.3
+TOL = 0.15
 HOLD_TIME = 3.0
 
 # -- Module-level state -----------------------------------------------------

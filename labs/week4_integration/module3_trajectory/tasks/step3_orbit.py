@@ -29,7 +29,7 @@ CENTER_FWD = 2.0      # start (0,0) sits on the circle, at its near edge
 RADIUS = 2.0
 PERIOD = 6.0          # seconds per revolution at full speed
 REVOLUTIONS = 2
-TARGET_HEIGHT = 3.0
+TARGET_HEIGHT = 1.0
 KP_POS = 0.6          # position error -> velocity (1/s)
 ALT_KP = 0.6          # altitude error -> vertical velocity (1/s)
 

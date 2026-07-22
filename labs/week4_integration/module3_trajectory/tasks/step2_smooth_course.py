@@ -23,7 +23,7 @@ import neo_lab
 # -- Constants --------------------------------------------------------------
 WAYPOINTS = [(0.0, 0.0), (2.0, 3.0), (-1.0, 5.0), (2.0, 7.0), (0.0, 9.0)]  # (right, forward)
 SEG_TIME = 3.5        # seconds per waypoint-to-waypoint segment
-TARGET_HEIGHT = 3.0
+TARGET_HEIGHT = 1.0
 KP_POS = 0.6          # position error -> velocity (1/s)
 ALT_KP = 0.6          # altitude error -> vertical velocity (1/s)
 _VEL_DT = 0.02        # finite-difference step for reading the trajectory's velocity

@@ -22,7 +22,7 @@ import neo_lab
 
 # -- Constants --------------------------------------------------------------
 TARGET_DIST = 4.0    # meters forward
-TARGET_HEIGHT = 3.0  # hold launch height
+TARGET_HEIGHT = 1.0  # hold launch height
 KP = 0.15
 KI = 0.0
 KD = 0.5    # strong velocity damping to avoid overshoot
