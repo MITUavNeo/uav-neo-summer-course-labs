@@ -29,7 +29,9 @@ build.
 ## Run on the real drone
 
 The autonomy stack (MAVROS + relays, no manual-teleop mux) starts on boot, so you only
-run the flight. From a shell on the drone:
+run the flight. First time on a drone, run the pre-flight checks
+(`diagnostics/camera_check.py`, then `diagnostics/takeoff_check.py` — see
+`labs/diagnostics/README.md`) before any flight below. Then, from a shell on the drone:
 
 ```bash
 python3 ~/jupyter_ws/labs/flights/maneuver_flight/main.py

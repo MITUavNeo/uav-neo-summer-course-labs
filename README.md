@@ -134,6 +134,17 @@ drone sync all         # both
 `update.sh` (from the installer) pulls new course labs and library onto either machine. Edit
 once, `drone sync`, run on either side.
 
+**Before your first lab on the real drone** (and after any update), run the two pre-flight
+checks from `labs/diagnostics/` on the drone:
+
+```bash
+python3 ~/jupyter_ws/<team>/labs/diagnostics/camera_check.py    # no flight: both cameras stream and the vision runs
+python3 ~/jupyter_ws/<team>/labs/diagnostics/takeoff_check.py   # minimal flight: climb to 1 m and land (safety pilot arms + OFFBOARD)
+```
+
+If either fails, fix that first — every vision lab needs both cameras, and every flying lab
+starts with the same launch these scripts exercise.
+
 **What actually carries over.** Not every lab flies the same on hardware:
 
 | Labs | Runs the same on the drone? |

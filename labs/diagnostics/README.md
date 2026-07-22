@@ -1,8 +1,9 @@
 # Diagnostics
 
-Standalone check scripts for verifying drone behavior outside a lab. They are not part of the
-curriculum sequence and teach nothing on their own; use them to sanity-check the hardware and
-the launch before running the labs.
+Standalone check scripts for verifying drone behavior outside a lab. **Run both before your
+first lab on a drone, and again after any update**: `camera_check.py` first (no flight), then
+`takeoff_check.py` (a minimal flight). They are not part of the curriculum sequence; they
+verify that the hardware and the launch the labs depend on actually work.
 
 Run them like any lab:
 
