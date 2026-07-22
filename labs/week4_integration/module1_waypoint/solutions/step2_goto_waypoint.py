@@ -23,12 +23,7 @@ import neo_lab
 TARGET_RIGHT = 2.0
 TARGET_FWD = 4.0
 TARGET_HEIGHT = 3.0
-KP_POS = 0.15
-KD_POS = 0.5
-ALT_KP = 0.12
-ROLL_LIMIT = 0.25
-PITCH_LIMIT = 0.25
-THROTTLE_LIMIT = 0.5
+KP_POS = 0.15          # target speed (m/s) per meter of position error
 POS_TOL = 0.5
 SETTLE_SPEED = 0.25
 HOLD_TIME = 1.5
@@ -57,11 +52,12 @@ def update(drone):
     _z += vz * dt
     err_right = TARGET_RIGHT - _x
     err_fwd = TARGET_FWD - _z
-    roll = uav_utils.clamp(KP_POS * err_right - KD_POS * vx, -ROLL_LIMIT, ROLL_LIMIT)
-    pitch = uav_utils.clamp(KP_POS * err_fwd - KD_POS * vz, -PITCH_LIMIT, PITCH_LIMIT)
-    throttle = uav_utils.clamp(ALT_KP * (TARGET_HEIGHT - neo_lab.height(drone)),
-                               -THROTTLE_LIMIT, THROTTLE_LIMIT)
-    drone.flight.send_pcmd(pitch, roll, 0, throttle)
+    v_right = uav_utils.clamp(KP_POS * err_right,
+                              -neo_lab.REAL_MAX_SPEED, neo_lab.REAL_MAX_SPEED)
+    v_forward = uav_utils.clamp(KP_POS * err_fwd,
+                                -neo_lab.REAL_MAX_SPEED, neo_lab.REAL_MAX_SPEED)
+    v_up = neo_lab.altitude_hold_velocity(drone, TARGET_HEIGHT)
+    neo_lab.send_velocity(drone, v_right, v_up, v_forward)
     speed = (vx ** 2 + vz ** 2) ** 0.5
     if abs(err_right) < POS_TOL and abs(err_fwd) < POS_TOL and speed < SETTLE_SPEED:
         _hold += dt

@@ -7,8 +7,8 @@ together, which is the foundation for flying a pattern and running a gate course
 ## What you'll learn
 
 - **Dead reckoning on three axes** — estimating right/up/forward position from velocity.
-- **A three-axis position controller** — combining roll, pitch, and throttle at once.
-- **A velocity (D) term** — braking on approach so you arrive without overshooting.
+- **A three-axis position controller** — commanding a body velocity on all three axes at once.
+- **Velocity commands** — turning position error into a target speed the flight layer tracks, the same call in the sim and on the real drone.
 
 ## How it works
 
@@ -22,26 +22,30 @@ right and forward axes. The velocity already arrives in the **body frame** (x=ri
 z=forward), so no rotation is needed. The estimate drifts as small errors pile up — which is
 why the arrival tolerance is generous and why real drones correct it with a camera or GPS.
 
-**Drive three axes together.** Each axis gets its own controller and its own actuator: roll for
-the right error, pitch for the forward error, throttle for the height error. Run all three
-every frame and the drone moves diagonally toward the point.
+**Drive three axes together.** Each axis gets a target velocity: right, forward, and up. You
+command them together with `neo_lab.send_velocity(drone, v_right, v_up, v_forward)` and the drone
+moves diagonally toward the point. The same call runs on the real drone, where the flight
+controller tracks the velocity; in the sim a shared inner loop turns it into tilt and throttle,
+so the vertical and speed scaling lives in one place instead of being retuned in this lab.
 
-**Brake so you arrive, not overshoot.** Pure proportional control on position tends to build
-speed and blow past the target. Adding a **derivative** term — `KP · error − KD · velocity` —
-turns the velocity itself into a brake: the faster you move, the harder it pulls back, so you
-ease into the waypoint instead of circling it. That is **PD control**, the P+D of PID without
-the integral.
+**Let the shrinking target speed brake you.** Turn each position error into a target speed,
+`v = KP · error`, capped at `neo_lab.REAL_MAX_SPEED`. As you close in, the error shrinks, so the
+commanded speed shrinks with it and you ease into the waypoint instead of blowing past it — the
+velocity loop underneath supplies the damping a hand-tuned brake term used to. Hold height with
+`neo_lab.altitude_hold_velocity`, which returns the vertical speed that keeps you at
+`TARGET_HEIGHT`.
 
-Why it matters: "estimate position, command all axes, brake on arrival" is the core of
-autonomous navigation. The next module chains waypoints into a path, and a gate course is just
-a longer version of the same loop.
+Why it matters: "estimate position, command a velocity on all axes, ease in on arrival" is the
+core of autonomous navigation. The next module chains waypoints into a path, and a gate course
+is just a longer version of the same loop.
 
 ## Key terms
 
 - **Waypoint** — a target point to fly to, here `(right, up, forward)` meters from where you started.
 - **Dead reckoning** — estimating position by integrating velocity (`position += velocity · dt`) because the sim has no position sensor. It drifts over time, which is why the tolerance is generous.
 - **Body frame** — directions relative to the drone: x = right, y = up, z = forward. The velocity reading is already in this frame.
-- **PD control** — proportional plus derivative: `KP · error − KD · velocity`. The derivative term acts as a brake so you settle instead of overshooting.
+- **Velocity command** — `neo_lab.send_velocity(drone, v_right, v_up, v_forward)`: you ask for a body-frame speed and the flight layer produces it (a velocity setpoint on the real drone, tilt and throttle in the sim). The same call works in both.
+- **Proportional speed** — `v = KP · error` capped at `REAL_MAX_SPEED`: the target speed shrinks as you approach, so you settle without a separate brake term.
 
 ## How to run
 
@@ -72,10 +76,10 @@ to the target point, brakes, holds, and lands.
 
 | Symptom | Fix |
 |---------|-----|
-| Drone flies the wrong direction | Check axis signs: roll handles right (x), pitch handles forward (z); positive error means go that way. |
-| Overshoots and circles the target | Raise `KD_POS`, or lower `KP_POS`. The velocity term must oppose motion. |
+| Drone flies the wrong direction | Check axis signs: `v_right` drives right (x), `v_forward` drives forward (z); positive error means go that way. |
+| Overshoots the target | Lower `KP_POS` for a gentler approach, or lower `REAL_MAX_SPEED`. The target speed must fall to zero as the error does. |
 | Never finishes | Position drift may keep the error above `POS_TOL`; confirm the speed-and-position-and-hold logic, and that `POS_TOL` is generous. |
-| Loses height while translating | Throttle must still run the altitude term while you roll and pitch. |
+| Loses height while translating | Keep passing `v_up` from `altitude_hold_velocity` every frame, not only once stopped. |
 
 ## Going further (optional)
 

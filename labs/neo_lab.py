@@ -165,19 +165,32 @@ def send_velocity(drone, v_right, v_up, v_forward, yaw_rate=0.0):
         )
 
 
+_ALT_HOLD_KP = 1.5      # m/s of vertical correction per meter of altitude error
+_ALT_HOLD_MAX = 1.5     # m/s cap on the altitude-hold correction
+
+
+def altitude_hold_velocity(drone, target_height):
+    """Vertical velocity (m/s) that holds `target_height` above the launch ground. Pass it
+    as the v_up argument of send_velocity, so the sim/real vertical scaling is not repeated
+    in each lab."""
+    return uav_utils.clamp(_ALT_HOLD_KP * (target_height - height(drone)),
+                           -_ALT_HOLD_MAX, _ALT_HOLD_MAX)
+
+
 class Launcher:
     """
     Arms the drone and climbs to `target_height` meters above the ground measured
     when launching begins. Call update(drone) every frame until it returns True.
 
-    Throttle is a velocity command, so the proportional gain is intentionally small.
+    The climb is a vertical velocity command through send_velocity, so the sim/real
+    vertical scaling lives in one place instead of a launcher-local throttle gain.
     """
 
-    def __init__(self, target_height=3.0, kp=0.2, throttle_limit=0.5,
+    def __init__(self, target_height=3.0, climb_kp=1.0, max_climb_speed=2.0,
                  tol=0.4, arm_time=1.5, settle=1.0):
         self.target_height = target_height
-        self.kp = kp
-        self.throttle_limit = throttle_limit
+        self.climb_kp = climb_kp
+        self.max_climb_speed = max_climb_speed
         self.tol = tol
         self.arm_time = arm_time
         self.settle = settle
@@ -209,11 +222,11 @@ class Launcher:
             drone.flight.takeoff()
             return False
 
-        # Phase 2: climb to target height (throttle ~ vertical velocity).
+        # Phase 2: climb to target height as a vertical velocity command.
         err = self.target_height - height(drone)
-        throttle = uav_utils.clamp(self.kp * err, -self.throttle_limit,
-                                   self.throttle_limit)
-        drone.flight.send_pcmd(0, 0, 0, throttle)
+        v_up = uav_utils.clamp(self.climb_kp * err, -self.max_climb_speed,
+                               self.max_climb_speed)
+        send_velocity(drone, 0, v_up, 0)
         self._hold = self._hold + dt if abs(err) < self.tol else 0.0
         if self._hold >= self.settle:
             drone.flight.stop()

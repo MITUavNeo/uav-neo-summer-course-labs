@@ -71,7 +71,7 @@ each), returns near the start, and lands.
 | Skips a corner | `WP_TOL` may be too large, or you advance `_wp` before actually arriving. |
 | Stalls between corners | `WP_TOL` too tight for the dead-reckoning drift — loosen it. |
 | Drifts farther off each leg | Position error accumulates; this is expected. Note how far off the final corner is from the start. |
-| Loses height while turning corners | Keep the throttle altitude term running every frame, not just on straight legs. |
+| Loses height while turning corners | Keep passing `v_up` from `altitude_hold_velocity` every frame, not just on straight legs. |
 
 ## Going further (optional)
 
