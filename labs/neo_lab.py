@@ -189,6 +189,12 @@ class Launcher:
         self._ground_set = False
         self.done = False
 
+    def skip(self, drone):
+        """Mark the climb complete and run from wherever the drone already is."""
+        set_ground(drone.physics.get_altitude())
+        self._ground_set = True
+        self.done = True
+
     def update(self, drone):
         if self.done:
             return True
@@ -276,9 +282,17 @@ def record(drone, **extra):
 
 
 LED_BLINK_PERIOD_S = 0.5   # full on+off cycle of the flying indicator
+LAUNCH_SKIP_ENV = "NEO_NO_LAUNCH"
 
 
-def run_module(title, steps, launch_height=3.0, autostart=False, led_color=None):
+def _launch_enabled(launch):
+    if launch is not None:
+        return launch
+    return not os.environ.get(LAUNCH_SKIP_ENV, "")
+
+
+def run_module(title, steps, launch_height=3.0, autostart=False, led_color=None,
+               launch=None):
     """Standard lab orchestrator: create the drone, arm and climb, then run each step in
     order and land. `steps` is a list of (label, module) where each module has reset()
     and update(drone) -> done. Records telemetry when NEO_RECORD is set.
@@ -292,9 +306,15 @@ def run_module(title, steps, launch_height=3.0, autostart=False, led_color=None)
     led_color, if given as an (r, g, b) tuple, blinks the LED strip while the drone is
     flying and turns it off on landing. Leave it None to let a step drive the strip
     itself (the shape flight holds it solid for a long exposure).
+
+    launch=False skips the arm-and-climb phase and runs the steps at whatever altitude the
+    drone is already holding, for when the safety pilot flies it up by hand. Leaving it
+    None takes the default from the NEO_NO_LAUNCH environment variable, so the whole lab
+    set can be switched over without editing each main.py.
     """
     import drone_core
     drone = drone_core.create_drone()
+    launching = _launch_enabled(launch)
     launcher = Launcher(launch_height)
     state = {"i": 0}
     blink = {"clock": 0.0, "on": None}
@@ -307,6 +327,11 @@ def run_module(title, steps, launch_height=3.0, autostart=False, led_color=None)
         print("\n" + "=" * 56)
         print(f"  {title}")
         print("=" * 56 + "\n")
+        if not launching:
+            launcher.skip(drone)
+            steps[0][1].reset()
+            print("[launch] skipped; running at the current altitude")
+            print(f"--- {steps[0][0]} ---")
 
     def blink_led(landing):
         if led_color is None:
