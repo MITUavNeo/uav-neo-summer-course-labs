@@ -184,27 +184,28 @@ DEFAULT_LAUNCH_HEIGHT = 1.0
 
 class Launcher:
     """
-    Arms the drone and climbs to `target_height` meters above the ground measured
-    when launching begins. Call update(drone) every frame until it returns True.
+    Arms the drone (once) and climbs to `target_height` meters above the ground measured when
+    launching begins, using a velocity-controlled climb so it eases into the target instead of
+    overshooting. Call update(drone) every frame until it returns True.
 
-    The climb is a vertical velocity command through send_velocity, so the sim/real
-    vertical scaling lives in one place instead of a launcher-local throttle gain.
+    takeoff() is called a single time to arm; calling it every frame makes the sim fling the
+    drone up ballistically (a large overshoot). The climb itself is a send_velocity command, so
+    the sim/real vertical scaling lives in one place.
     """
 
     def __init__(self, target_height=DEFAULT_LAUNCH_HEIGHT, climb_kp=1.0, max_climb_speed=2.0,
-                 tol=0.25, arm_time=0.5, settle=1.0):
+                 tol=0.25, settle=1.0):
         self.target_height = target_height
         self.climb_kp = climb_kp
         self.max_climb_speed = max_climb_speed
         self.tol = tol
-        self.arm_time = arm_time
         self.settle = settle
         self.reset()
 
     def reset(self):
-        self._t = 0.0
         self._hold = 0.0
         self._ground_set = False
+        self._armed = False
         self.done = False
 
     def skip(self, drone):
@@ -221,13 +222,11 @@ class Launcher:
             set_ground(drone.physics.get_altitude())
             self._ground_set = True
 
-        # Phase 1: arm the motors.
-        self._t += dt
-        if self._t < self.arm_time:
+        # Arm once; takeoff() only arms, the climb below is velocity-controlled.
+        if not self._armed:
             drone.flight.takeoff()
-            return False
+            self._armed = True
 
-        # Phase 2: climb to target height as a vertical velocity command.
         err = self.target_height - height(drone)
         v_up = uav_utils.clamp(self.climb_kp * err, -self.max_climb_speed,
                                self.max_climb_speed)
