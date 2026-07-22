@@ -105,7 +105,9 @@ drone sim course/week3_controls/module3_pid/main.py            # all steps, your
 drone sim course/week3_controls/module3_pid/main_solution.py   # reference flight
 ```
 
-Press **Enter** in the simulator window to start.
+Press **Enter** in the simulator window to start. **Step 3 needs a gate scene** (e.g.
+**LabD_GateNavigation**): the ArUco tags only decode up close, so start with the drone facing a
+gate a few meters away, or Step 3 will sweep looking for one and land after `SEARCH_TIMEOUT`.
 
 ## Steps
 

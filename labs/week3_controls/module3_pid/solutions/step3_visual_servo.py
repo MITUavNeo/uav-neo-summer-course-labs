@@ -31,11 +31,13 @@ MAX_YAW = 0.25
 SEARCH_YAW = 0.2
 CENTER_TOL = 0.15    # normalized error considered centered
 HOLD_TIME = 1.0
+SEARCH_TIMEOUT = 15.0  # land instead of scanning forever if no gate is ever seen
 
 # -- Module-level state -----------------------------------------------------
 _err_int = 0.0
 _prev_err = 0.0
 _hold = 0.0
+_search_t = 0.0
 _done = False
 
 def pid_control(err, err_int, err_dot, kp, ki, kd):
@@ -43,25 +45,33 @@ def pid_control(err, err_int, err_dot, kp, ki, kd):
     return kp * err + ki * err_int + kd * err_dot
 
 def reset():
-    global _err_int, _prev_err, _hold, _done
+    global _err_int, _prev_err, _hold, _search_t, _done
     _err_int = 0.0
     _prev_err = 0.0
     _hold = 0.0
+    _search_t = 0.0
     _done = False
 
 
 def update(drone):
-    global _err_int, _prev_err, _hold, _done
+    global _err_int, _prev_err, _hold, _search_t, _done
     if _done:
         return True
     dt = drone.get_delta_time()
     image = drone.camera.get_color_image()
     gate = neo_lab.detect_gate(image)            # gate located from its ArUco corner tags
     if gate is None:
+        _search_t += dt
+        if _search_t >= SEARCH_TIMEOUT:          # give up rather than spin forever
+            drone.flight.stop()
+            print("[Step 3] No gate seen; landing. Start facing a gate, up close.")
+            _done = True
+            return True
         drone.flight.send_pcmd(0, 0, SEARCH_YAW, 0)   # scan for a gate
         _err_int = 0.0                           # reset integral when target is lost
         _hold = 0.0
         return False
+    _search_t = 0.0
     error = (gate.cx - COL_CENTER) / COL_CENTER  # normalized -1..+1
     _err_int = uav_utils.clamp(_err_int + error * dt, -1.0, 1.0)
     err_dot = (error - _prev_err) / dt if dt > 0 else 0.0

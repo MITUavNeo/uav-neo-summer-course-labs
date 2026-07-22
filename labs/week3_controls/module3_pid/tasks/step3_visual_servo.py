@@ -30,11 +30,13 @@ MAX_YAW = 0.25
 SEARCH_YAW = 0.2
 CENTER_TOL = 0.15    # normalized error considered centered
 HOLD_TIME = 1.0
+SEARCH_TIMEOUT = 15.0  # land instead of scanning forever if no gate is ever seen
 
 # -- Module-level state -----------------------------------------------------
 _err_int = 0.0
 _prev_err = 0.0
 _hold = 0.0
+_search_t = 0.0
 _done = False
 
 def pid_control(err, err_int, err_dot, kp, ki, kd):
@@ -47,15 +49,16 @@ def pid_control(err, err_int, err_dot, kp, ki, kd):
     return output
 
 def reset():
-    global _err_int, _prev_err, _hold, _done
+    global _err_int, _prev_err, _hold, _search_t, _done
     _err_int = 0.0
     _prev_err = 0.0
     _hold = 0.0
+    _search_t = 0.0
     _done = False
 
 
 def update(drone):
-    global _err_int, _prev_err, _hold, _done
+    global _err_int, _prev_err, _hold, _search_t, _done
     if _done:
         return True
     ##################################
@@ -70,7 +73,9 @@ def update(drone):
     #
     # Turn the gate's horizontal offset from the image center (.cx vs COL_CENTER) into a
     # normalized error, PID it to a yaw command clamped to MAX_YAW, and sweep at SEARCH_YAW
-    # when no gate is in view. See the README (Key terms) and Week 2 Module 5 for detect_gate.
+    # when no gate is in view. Count time without a gate and land once it passes SEARCH_TIMEOUT,
+    # so a missing gate ends the lab instead of spinning forever. See the README (Key terms) and
+    # Week 2 Module 5 for detect_gate.
 
     ###### END PUT CODE HERE #########
     ##################################
