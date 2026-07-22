@@ -184,13 +184,13 @@ DEFAULT_LAUNCH_HEIGHT = 1.0
 
 class Launcher:
     """
-    Arms the drone (once) and climbs to `target_height` meters above the ground measured when
-    launching begins, using a velocity-controlled climb so it eases into the target instead of
-    overshooting. Call update(drone) every frame until it returns True.
+    Climbs to `target_height` meters above the ground measured when launching begins, using a
+    velocity-controlled climb so it eases into the target instead of overshooting. Call
+    update(drone) every frame until it returns True.
 
-    takeoff() is called a single time to arm; calling it every frame makes the sim fling the
-    drone up ballistically (a large overshoot). The climb itself is a send_velocity command, so
-    the sim/real vertical scaling lives in one place.
+    The climb is a send_velocity command only. takeoff() is deliberately not called: in this sim
+    it imparts a large ballistic upward impulse (a several-meter overshoot). On the real drone
+    the same velocity setpoints drive the OFFBOARD climb once the safety pilot arms.
     """
 
     def __init__(self, target_height=DEFAULT_LAUNCH_HEIGHT, climb_kp=1.0, max_climb_speed=2.0,
@@ -205,7 +205,6 @@ class Launcher:
     def reset(self):
         self._hold = 0.0
         self._ground_set = False
-        self._armed = False
         self.done = False
 
     def skip(self, drone):
@@ -222,11 +221,7 @@ class Launcher:
             set_ground(drone.physics.get_altitude())
             self._ground_set = True
 
-        # Arm once; takeoff() only arms, the climb below is velocity-controlled.
-        if not self._armed:
-            drone.flight.takeoff()
-            self._armed = True
-
+        # Climb with a velocity command only (no takeoff(), which imparts a ballistic impulse).
         err = self.target_height - height(drone)
         v_up = uav_utils.clamp(self.climb_kp * err, -self.max_climb_speed,
                                self.max_climb_speed)
