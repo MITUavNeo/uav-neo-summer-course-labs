@@ -296,6 +296,7 @@ def record(drone, **extra):
 
 LED_BLINK_PERIOD_S = 0.5   # full on+off cycle of the flying indicator
 LAUNCH_SKIP_ENV = "NEO_NO_LAUNCH"
+AUTOSTART_ENV = "NEO_AUTOSTART"
 
 
 def _launch_enabled(launch):
@@ -304,7 +305,16 @@ def _launch_enabled(launch):
     return not os.environ.get(LAUNCH_SKIP_ENV, "")
 
 
-def run_module(title, steps, launch_height=3.0, autostart=False, led_color=None,
+def _autostart_enabled(autostart, drone):
+    if autostart is not None:
+        return autostart
+    env = os.environ.get(AUTOSTART_ENV, "")
+    if env != "":
+        return env not in ("0", "false", "False")
+    return not _is_sim(drone)   # real drone runs controller-free; the sim waits for its start key
+
+
+def run_module(title, steps, launch_height=3.0, autostart=None, led_color=None,
                launch=None):
     """Standard lab orchestrator: create the drone, arm and climb, then run each step in
     order and land. `steps` is a list of (label, module) where each module has reset()
@@ -314,7 +324,9 @@ def run_module(title, steps, launch_height=3.0, autostart=False, led_color=None,
     and calls this, so the orchestration lives in one place.
 
     autostart runs the program without the START button / a game controller (the real
-    drone's safety pilot still gates motion via OFFBOARD; stop with Ctrl-C).
+    drone's safety pilot still gates motion via OFFBOARD; stop with Ctrl-C). Left None it
+    defaults to on for the real drone and off in the simulator (which waits for its start key);
+    set NEO_AUTOSTART=1 or 0 to force it either way.
 
     led_color, if given as an (r, g, b) tuple, blinks the LED strip while the drone is
     flying and turns it off on landing. Leave it None to let a step drive the strip
@@ -384,4 +396,4 @@ def run_module(title, steps, launch_height=3.0, autostart=False, led_color=None,
             print(f"[{steps[state['i']][0]}] height={height(drone):.2f}m")
 
     drone.set_start_update(start, update, update_slow)
-    drone.go(autostart)
+    drone.go(_autostart_enabled(autostart, drone))
