@@ -26,7 +26,7 @@ if _d not in _sys.path:
 import neo_lab
 
 # -- Constants --------------------------------------------------------------
-PROBE_PITCH = 0.10     # gentle forward drift so there is motion to measure
+PROBE_SPEED = 0.4      # m/s forward drift; a steady slow speed keeps the flow trackable
 HOVER_TIME = 4.0
 SKIP = 2               # do the vision work every Nth frame (image pull + flow are the cost)
 MIN_PTS = 20           # re-find features when fewer than this survive
@@ -60,7 +60,8 @@ def update(drone):
     ##################################
     #### START PUT CODE HERE #########
 
-    # Keep the drone drifting (PROBE_PITCH) and the clock running EVERY frame; only pull
+    # Keep the drone drifting (neo_lab.send_velocity(drone, 0, 0, PROBE_SPEED)) and the clock
+    # running EVERY frame; only pull
     # the image and run flow every SKIP-th frame (that vision work is what would lag the
     # sim). On a processed frame, work in grayscale: when you have no features yet (or
     # fewer than MIN_PTS survive), detect new corners with FEATURE_PARAMS; otherwise track

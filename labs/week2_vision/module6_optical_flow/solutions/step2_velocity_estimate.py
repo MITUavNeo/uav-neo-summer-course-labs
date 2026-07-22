@@ -26,7 +26,7 @@ import neo_lab
 # -- Constants --------------------------------------------------------------
 IMAGE_WIDTH = 640
 HFOV_TAN = 1.0
-PROBE_PITCH = 0.12
+PROBE_SPEED = 0.4      # m/s forward drift; a steady slow speed keeps the flow trackable
 RUN_TIME = 6.0
 SKIP = 2
 MIN_PTS = 20
@@ -61,7 +61,7 @@ def update(drone):
     if _done:
         return True
     dt = drone.get_delta_time()
-    drone.flight.send_pcmd(PROBE_PITCH, 0, 0, 0)
+    neo_lab.send_velocity(drone, 0, 0, PROBE_SPEED)
     _timer += dt
     _interval += dt
     _frame += 1
@@ -82,7 +82,7 @@ def update(drone):
                     mean_dy = float(disp[:, 1].mean())
                     height = max(neo_lab.height(drone), 0.1)
                     mpp = 2.0 * height * HFOV_TAN / IMAGE_WIDTH
-                    _est = (-mean_dx * mpp / _interval, -mean_dy * mpp / _interval)
+                    _est = (-mean_dx * mpp / _interval, mean_dy * mpp / _interval)
                     vx, vy, vz = drone.physics.get_linear_velocity()
                     _true = (float(vx), float(vz))
                 _prev_pts = good_new.reshape(-1, 1, 2)

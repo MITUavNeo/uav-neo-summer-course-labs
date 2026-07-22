@@ -27,7 +27,7 @@ import neo_lab
 # -- Constants --------------------------------------------------------------
 IMAGE_WIDTH = 640
 HFOV_TAN = 1.0         # tan(half of a 90 deg horizontal field of view)
-PROBE_PITCH = 0.12     # forward drift to create measurable flow
+PROBE_SPEED = 0.4      # m/s forward drift; a steady slow speed keeps the flow trackable
 RUN_TIME = 6.0
 SKIP = 2               # do the vision work every Nth frame
 MIN_PTS = 20
@@ -64,16 +64,18 @@ def update(drone):
     # velocity, so you can see how well vision tracks motion.
     #
     # Tools: drone.camera.get_downward_image(); neo_lab.height(drone);
-    #        drone.physics.get_linear_velocity(); drone.get_delta_time(); send_pcmd(...);
+    #        drone.physics.get_linear_velocity(); drone.get_delta_time();
+    #        neo_lab.send_velocity(drone, 0, 0, PROBE_SPEED);
     #        plus the sparse optical-flow tracking you built in Step 1.
     #
-    # Every frame: drift (PROBE_PITCH), add dt to _timer AND to _interval, and _frame += 1.
+    # Every frame: drift at PROBE_SPEED, add dt to _timer AND to _interval, and _frame += 1.
     # Only every SKIP-th frame: track corner points (sparse flow, like Step 1) and average
     # the kept points' displacement in pixels. Convert that to meters/second: one pixel's
     # ground footprint grows with height and the camera's field of view (use HFOV_TAN and
     # IMAGE_WIDTH), and divide by _interval (the time between PROCESSED frames, not one dt);
-    # then reset _interval. The camera moves opposite the scene flow (sign flip). Finish at
-    # RUN_TIME, printing the estimate vs. true velocity. See the README (Key terms).
+    # then reset _interval. Watch the signs so the estimate moves the same direction as the
+    # true velocity (one image axis may be flipped). Finish at RUN_TIME, printing the estimate
+    # vs. true velocity. See the README (Key terms).
 
     ###### END PUT CODE HERE #########
     ##################################

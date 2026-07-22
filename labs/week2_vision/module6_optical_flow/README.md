@@ -81,7 +81,7 @@ flow magnitude; Step 2 prints an estimated velocity beside the drone's true velo
 
 | Symptom | Fix |
 |---------|-----|
-| Flow is ~0 | Run in the **OpticalFlow** world (textured floor); a bare floor gives near-zero flow. Also confirm the drone is drifting (`PROBE_PITCH`). |
+| Flow is ~0 | Run in the **OpticalFlow** world (textured floor); a bare floor gives near-zero flow. Also confirm the drone is drifting (`PROBE_SPEED`). |
 | First frame errors | Sparse flow needs a previous frame *and* points — find features and store `_prev_gray`/`_prev_pts` before tracking. |
 | Lab lags the sim | Don't run dense flow per pixel; sparse tracking (this lab) stays real-time. Lower `maxCorners` if needed. |
 | Estimate has the wrong sign | The camera moves opposite to the scene flow; negate the mean flow. |

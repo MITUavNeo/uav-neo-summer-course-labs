@@ -23,7 +23,7 @@ if _d not in _sys.path:
 import neo_lab
 
 # -- Constants --------------------------------------------------------------
-PROBE_PITCH = 0.10
+PROBE_SPEED = 0.4     # m/s forward drift; a steady slow speed keeps the flow trackable
 HOVER_TIME = 4.0
 SKIP = 2          # run the vision work every Nth frame (image pull + flow are the cost)
 MIN_PTS = 20      # re-detect features when fewer than this survive
@@ -53,7 +53,7 @@ def update(drone):
     global _prev_gray, _prev_pts, _timer, _frame, _last_mag, _done
     if _done:
         return True
-    drone.flight.send_pcmd(PROBE_PITCH, 0, 0, 0)   # keep drifting every frame
+    neo_lab.send_velocity(drone, 0, 0, PROBE_SPEED)   # steady slow drift, not a growing tilt
     _timer += drone.get_delta_time()
     _frame += 1
     if _frame % SKIP == 0:                          # only do vision on these frames
