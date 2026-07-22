@@ -54,14 +54,14 @@ def update(drone):
     # GOAL: fly to (TARGET_RIGHT, TARGET_HEIGHT, TARGET_FWD) and hold there.
     #
     # Tools: drone.physics.get_linear_velocity() -> (vx, vy, vz); drone.get_delta_time();
-    #        neo_lab.altitude_hold_velocity(drone, TARGET_HEIGHT); uav_utils.clamp(...);
+    #        neo_lab.altitude_hold_velocity(drone, TARGET_HEIGHT);
     #        neo_lab.send_velocity(drone, v_right, v_up, v_forward).
     #
     # Track right/forward position by integrating vx, vz like Step 1. Turn each position
-    # error into a target speed (gain KP_POS), clamped to neo_lab.REAL_MAX_SPEED. Hold
-    # height with neo_lab.altitude_hold_velocity. Command all three with send_velocity.
-    # Finish when both horizontal errors are under POS_TOL and speed is under SETTLE_SPEED
-    # for HOLD_TIME.
+    # error into a target speed (gain KP_POS); send_velocity turns it into motion and applies
+    # the real-drone speed cap for you, so you don't clamp it yourself. Hold height with
+    # neo_lab.altitude_hold_velocity. Command all three with send_velocity. Finish when both
+    # horizontal errors are under POS_TOL and speed is under SETTLE_SPEED for HOLD_TIME.
 
     ###### END PUT CODE HERE #########
     ##################################

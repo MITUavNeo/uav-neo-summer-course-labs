@@ -53,14 +53,14 @@ def update(drone):
     # GOAL: visit each corner in WAYPOINTS in order, then finish.
     #
     # Tools: drone.physics.get_linear_velocity(); drone.get_delta_time();
-    #        neo_lab.altitude_hold_velocity(drone, TARGET_HEIGHT); uav_utils.clamp(...);
+    #        neo_lab.altitude_hold_velocity(drone, TARGET_HEIGHT);
     #        neo_lab.send_velocity(drone, v_right, v_up, v_forward).
     #
     # Integrate vx, vz into (_x, _z) like Module 1. If _wp has passed the last waypoint,
     # stop and finish. Otherwise steer toward WAYPOINTS[_wp] the same way as Module 1:
-    # each position error becomes a target speed (gain KP_POS) clamped to
-    # neo_lab.REAL_MAX_SPEED, height held by neo_lab.altitude_hold_velocity, all three
-    # sent with send_velocity. When within WP_TOL of the corner on both axes, advance _wp += 1.
+    # each position error becomes a target speed (gain KP_POS), height held by
+    # neo_lab.altitude_hold_velocity, all three sent with send_velocity. When within WP_TOL
+    # of the corner on both axes, advance _wp += 1.
 
     ###### END PUT CODE HERE #########
     ##################################

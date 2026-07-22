@@ -29,11 +29,12 @@ controller tracks the velocity; in the sim a shared inner loop turns it into til
 so the vertical and speed scaling lives in one place instead of being retuned in this lab.
 
 **Let the shrinking target speed brake you.** Turn each position error into a target speed,
-`v = KP · error`, capped at `neo_lab.REAL_MAX_SPEED`. As you close in, the error shrinks, so the
+`v = KP · error`, and hand it to `send_velocity`. As you close in, the error shrinks, so the
 commanded speed shrinks with it and you ease into the waypoint instead of blowing past it — the
-velocity loop underneath supplies the damping a hand-tuned brake term used to. Hold height with
-`neo_lab.altitude_hold_velocity`, which returns the vertical speed that keeps you at
-`TARGET_HEIGHT`.
+velocity loop underneath supplies the damping a hand-tuned brake term used to. `send_velocity`
+turns that speed into motion, applying the real drone's `REAL_MAX_SPEED` limit on hardware and a
+matching tilt limit in the sim, so you don't cap it yourself. Hold height with
+`neo_lab.altitude_hold_velocity`, which returns the vertical speed that keeps you at `TARGET_HEIGHT`.
 
 Why it matters: "estimate position, command a velocity on all axes, ease in on arrival" is the
 core of autonomous navigation. The next module chains waypoints into a path, and a gate course
@@ -45,7 +46,7 @@ is just a longer version of the same loop.
 - **Dead reckoning** — estimating position by integrating velocity (`position += velocity · dt`) because the sim has no position sensor. It drifts over time, which is why the tolerance is generous.
 - **Body frame** — directions relative to the drone: x = right, y = up, z = forward. The velocity reading is already in this frame.
 - **Velocity command** — `neo_lab.send_velocity(drone, v_right, v_up, v_forward)`: you ask for a body-frame speed and the flight layer produces it (a velocity setpoint on the real drone, tilt and throttle in the sim). The same call works in both.
-- **Proportional speed** — `v = KP · error` capped at `REAL_MAX_SPEED`: the target speed shrinks as you approach, so you settle without a separate brake term.
+- **Proportional speed** — `v = KP · error`: the target speed shrinks as you approach, so you settle without a separate brake term. `send_velocity` applies the real-drone speed limit for you.
 
 ## How to run
 
@@ -77,7 +78,7 @@ to the target point, brakes, holds, and lands.
 | Symptom | Fix |
 |---------|-----|
 | Drone flies the wrong direction | Check axis signs: `v_right` drives right (x), `v_forward` drives forward (z); positive error means go that way. |
-| Overshoots the target | Lower `KP_POS` for a gentler approach, or lower `REAL_MAX_SPEED`. The target speed must fall to zero as the error does. |
+| Overshoots the target | Lower `KP_POS` for a gentler approach. The target speed must fall to zero as the error does. |
 | Never finishes | Position drift may keep the error above `POS_TOL`; confirm the speed-and-position-and-hold logic, and that `POS_TOL` is generous. |
 | Loses height while translating | Keep passing `v_up` from `altitude_hold_velocity` every frame, not only once stopped. |
 

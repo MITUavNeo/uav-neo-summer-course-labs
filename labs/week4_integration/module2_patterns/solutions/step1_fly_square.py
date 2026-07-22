@@ -6,7 +6,6 @@ Week 4 · Module 2 — Step 1: Fly a Square  (SOLUTION)
 """
 
 import drone_core
-import drone_utils as uav_utils
 
 # -- Course setup: makes the shared `neo_lab` helper importable.
 #    You don't need to read or change this block. --
@@ -53,10 +52,8 @@ def update(drone):
         _done = True
         return True
     target_right, target_fwd = WAYPOINTS[_wp]
-    v_right = uav_utils.clamp(KP_POS * (target_right - _x),
-                              -neo_lab.REAL_MAX_SPEED, neo_lab.REAL_MAX_SPEED)
-    v_forward = uav_utils.clamp(KP_POS * (target_fwd - _z),
-                                -neo_lab.REAL_MAX_SPEED, neo_lab.REAL_MAX_SPEED)
+    v_right = KP_POS * (target_right - _x)
+    v_forward = KP_POS * (target_fwd - _z)
     v_up = neo_lab.altitude_hold_velocity(drone, TARGET_HEIGHT)
     neo_lab.send_velocity(drone, v_right, v_up, v_forward)
     if abs(target_right - _x) < WP_TOL and abs(target_fwd - _z) < WP_TOL:
