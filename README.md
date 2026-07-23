@@ -185,6 +185,7 @@ neo_lab.altitude_hold_velocity(drone, target_height)    # vertical speed (m/s) t
 # --- vision ---
 neo_lab.detect_gate(image)              # locate a gate by its ArUco corner tags -> Gate(cx, cy, span, tag_px, ids) or None
 neo_lab.saturated_mask(image, s_min=100)# 0/255 mask of the vivid (recolored) ground line, by HSV saturation
+neo_lab.bright_mask(image, v_min=200)   # 0/255 mask of a glowing/white line on a dark floor, by HSV brightness (real drone)
 ```
 
 ## The drone API (quick reference)

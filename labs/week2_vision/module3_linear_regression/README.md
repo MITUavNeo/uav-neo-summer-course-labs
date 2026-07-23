@@ -42,7 +42,7 @@ the drone must turn many raw pixels into one clean decision.
 
 - **Linear regression** — finding the straight line that best fits a cloud of points.
 - **Least squares** — the rule that picks "best": the line that minimizes the sum of squared vertical distances from the points. `np.polyfit(xs, ys, 1)` does it for you and returns slope `m` and intercept `b`.
-- **Saturation mask** — keeping the vivid (high-saturation) pixels. `neo_lab.saturated_mask(image, S_MIN)` isolates a colored line from a grey floor for *any* line color.
+- **Saturation mask** — keeping the vivid (high-saturation) pixels. `neo_lab.saturated_mask(image, S_MIN)` isolates a colored line from a grey floor for *any* line color. For a **white LED line** on a dark floor (the real-drone course), white has no saturation — use `neo_lab.bright_mask(image, V_MIN)`, which keys on brightness instead; the rest of the pipeline is unchanged.
 - **`np.argwhere(mask)`** — returns the `(row, col)` coordinates of every nonzero pixel in a mask. Rows are the y-axis, columns are the x-axis.
 - **Pixel offset** — how far the detected line is from the center column of the image, in pixels. Positive means the line is to the right.
 - **Roll** — tilting left/right, which makes the drone strafe sideways. Used here to slide back over the line.

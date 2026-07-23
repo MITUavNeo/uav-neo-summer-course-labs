@@ -34,6 +34,13 @@ def saturated_mask(image, s_min=100):
     return (hsv[:, :, 1] > s_min).astype(np.uint8) * 255
 
 
+def bright_mask(image, v_min=200):
+    """Binary mask (0/255) of glowing regions by HSV Value (brightness). For a white LED
+    line on a dark floor on the real drone, where white has no saturation to key on."""
+    hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+    return (hsv[:, :, 2] > v_min).astype(np.uint8) * 255
+
+
 # ── Gate markers (ArUco) ─────────────────────────────────────────────────────────────
 # Each gate carries four DICT_6X6_250 tags, one per corner. The neon strips share the
 # sky's blue hue, so color cannot separate a gate from the background; the tags can.
