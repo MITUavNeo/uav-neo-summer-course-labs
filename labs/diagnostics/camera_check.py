@@ -5,7 +5,8 @@ confirm the real cameras process the same way the simulator's do. It does not fl
     sim:   drone sim course/camera_check.py       (press ENTER in the sim window)
     drone: python3 camera_check.py                (runs immediately; no flight)
 
-Point the forward camera at a gate and the downward camera at a colored line, then compare the
+Point the forward camera at a gate and the downward camera at the line (colored tape or a
+white LED strip - both masks are run and saved), then compare the
 printed detections and the saved images against a sim run. Watch the image shapes: the labs
 assume a 640-wide image (COL_CENTER=320, IMAGE_WIDTH=640, FOCAL_PX=320); a different real
 resolution means those per-camera constants need real values.
@@ -61,6 +62,12 @@ def _report(forward, downward):
         coverage = 100.0 * float((mask > 0).mean())
         print(f"[line] downward: {coverage:.1f}% saturated (line) pixels")
         cv2.imwrite(os.path.join(OUT_DIR, "cam_line_mask.png"), mask)
+
+        print("[line] running the brightness mask on the downward frame...")
+        bright = neo_lab.bright_mask(downward)
+        bright_coverage = 100.0 * float((bright > 0).mean())
+        print(f"[line] downward: {bright_coverage:.1f}% bright (LED line) pixels")
+        cv2.imwrite(os.path.join(OUT_DIR, "cam_bright_mask.png"), bright)
 
     if not (fwd_ok and down_ok):
         print("[hint] a None frame means that camera's driver is not publishing - check the "
